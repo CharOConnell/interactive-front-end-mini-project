@@ -62,7 +62,11 @@ function fetchGitHubInformation(event) {
         }, function(errorResponse){
             if (errorResponse.status == 404) { // if it is not found:
                 $("#gh-user-data").html(`<h2>No info found for user ${username}</h2>`);
-            } else {
+            } else if (errorResponse.status === 403) { // forbidden status code
+                var resetTime = new Date(errorResponse.getResponseHeader('X-RateLimit-Reset')*1000); // unix timestamp for when we can use it again
+                $("#gh-user-data").html(`<h4>Too many requests, please wait until ${resetTime.toLocaleTimeString()}</h4>`); // prints the local time
+                
+            }   else {
                 console.log(errorResponse); // find out what the error actually is
                 $("#gh-user-data").html(
                     `<h2>Error: ${errorResponse.responseJSON.message}</h2>` // tell the user what the error is
